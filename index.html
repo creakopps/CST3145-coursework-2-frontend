@@ -3,8 +3,9 @@
 
 <head>
     <title>Lessons</title>
-    <script src="https://unpkg.com/vue@2"></script>
+<script src="https://unpkg.com/vue@2"></script>  <script src="lessons.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <meta charset="UTF-8">
 </head>
 
 <body>
@@ -12,7 +13,7 @@
 
         <header>
             <h1 v-text="sitename"></h1>
-            <button @click='showCheckout'>{{cartItemCount}}<span class="fas fa-shopping-cart"></span>Checkout</button>
+            <button v-on:click='showCheckout'>{{cartItemCount}}<span class="fas fa-shopping-cart"></span>Checkout</button>
         </header>
         <main>
             <div v-if="showProduct">
@@ -38,116 +39,96 @@
                 </div>
 
                 <div style="display: flex; flex-wrap: wrap; gap: 10px">
-                    <div v-for="lessons in lessons" style="border: 5px solid blue; width: 150px; background-color: lightblue">
+                    <div v-for="lessons in lessons" style="border: 5px solid green; width: 150px; background-color: lightgreen;">
                         <figure>
                             <img v-bind:src="lessons.image" width="100px">
                         </figure>
                         <p><b>Subject: {{lessons.Subject}}</b></p>
                         <p><strong>Location: {{lessons.Location}}</strong></p>
                         <p><b>Price: {{lessons.price}}</b></p>
-                        <p><b>Space: {{lessons.Space}}</b></p>
-                        <button @click="addToCart(lessons)" :disabled="!canAddToCart(lessons)"><span class="fas fa-cart-plus">
+                        <button v-on:click="addToCart(lessons)" :disabled="!canAddToCart(lessons)"><span class="fas fa-cart-plus">
                             </span>Add to Cart</button>
-                        <span v-if="lessons.Space - cartCount(id) === 0">All Out!</span>
-                        <span v-else-if="lessons.Space - cartCount(id) < 10">
-                            Only{{lessons.Space - cartCount(id)}} left!</span>
+                        <span v-if="lessons.Space - cartCount(lessons) === 0">All Out!</span>
+                        <span v-else-if="lessons.Space - cartCount(lessons) < 5">
+                            Only{{lessons.Space - cartCount(lessons)}} left!</span>
                         <span v-else>Buy Now!</span>
                     </div>
                 </div>
             </div>
 
-
             <div v-else>
                 <div style="display: flex; flex-wrap: wrap; gap: 10px">
-                    <div v-for="lessons in cart" style="border: 5px solid blue; width: 150px; background-color: lightblue">
+                    <div v-for="lessons in cart" style="border: 5px solid green; width: 150px; background-color: lightgreen;">
                         <figure>
                             <img v-bind:src="lessons.image" width="100px">
                         </figure>
                         <p><b>Subject: {{lessons.Subject}}</b></p>
                         <p><strong>Location: {{lessons.Location}}</strong></p>
                         <p><b>Price: {{lessons.price}}</b></p>
-                        <p><b>Space: {{lessons.Space}}</b></p>
-                        <button @click="deleteLesson(lessons)"><span class="fas fa-cart-arrow-down"></span>Delete</button>
+                        <button @click="del(cart)"><span class="fas fa-cart-arrow-down"></span>Delete</button>
                     </div>
                 </div>
 
-
                 <h1>Checkout</h1>
-                <button @click="resetInput">Reset Input Checkout</button>
-                <p>
-                    <strong>First Name:</strong>
-                    <input v-model="order.FirstName" title="Letters only." required />
-                </p>
-                <p>
-                    <strong>Second Name:</strong>
-                    <input v-model="order.SecondName" title="Letters only." required />
-                </p>
-                <p>
-                    <strong>Phone Number:</strong>
-                    <input v-model="order.Phonenumber" minlength="10" title="Numbers only." required />
+                <p><strong>First Name:</strong>
+                    <input v-model="order.Name" /></p>
+                <p><strong>Phone number:</strong>
+                    <input v-model.number="order.Phonenumber" />
                 </p>
                 <h2>Order Information</h2>
-                <p>Name: {{order.FirstName}}</p>
-                <p>Name: {{order.SecondName}}</p>
+                <p>Name: {{order.Name}}</p>
                 <p>Phone number: {{order.Phonenumber}}</p>
-                <button :disabled='!valid' @click="submit" type="submit">Checkout</button>
+                <button @click='submit' type="submit">Checkout</button>
             </div>
         </main>
     </div>
-</body>
 
-<script>
-    let app = new Vue({
-        el: '#app',
-        data: {
-            sitename: "After School Lessons",
-            showProduct: true,
-            order: {
-                FirstName: '',
-                SecondName: '',
-                Phonenumber: '',
-            },
-            lessons: [],
-            cart: []
-        },
-        methods: {
 
-            addToCart(lessons) {
-                if ('canAddToCart(lessons') {
-                    this.cart.push(lessons)
-                    lessons.Space--;
-                }
-            },
-            canAddToCart(lessons) {
-                return lessons.Space;
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                sitename: "After School Lessons",
+                showProduct: true,
+                order: {
+                    Name: '',
+                    Phonenumber: '',
+                },
+                lessons: lessons,
+                cart: []
             },
 
-            cartCount(id) {
-                let count = 0;
-                for (let i = 0; i < this.cart.length; i++) {
-                    if (this.cart[i] === id) {
-                        count++;
+            methods: {
+                addToCart(lessons) {
+                    this.cart.push(lessons);
+
+                },
+                showCheckout() {
+                    this.showProduct = this.showProduct ? false : true;
+                },
+
+                canAddToCart(lessons) {
+                    return lessons.Space > this.cartCount(lessons);
+                },
+                cartCount(id) {
+                    let count = 0;
+                    for (let i = 0; i < this.cart.length; i++) {
+                        if (this.cart[i] === id) {
+                            count++;
+                        }
                     }
-                }
-                return count;
-            },
-
-            deleteLesson(lessons) {
-                if (this.cart.splice(this.cart.indexOf(lessons), 1)) {
-                    return lessons.Space++;
-                }
-            },
-            submit() {
-                var AddOrder = {
-                    order: this.cart,
-                    FirstName: this.order.FirstName,
-                    SecondName: this.order.SecondName,
-                    Phonenumber: this.order.Phonenumber,
-                    SpaceOrdered: this.lessons.Space,
-                };
-
-                // set the url to your server and route
-                fetch("https://coursework2-lession.herokuapp.com/collection/order", {
+                    return count;
+                },
+                submit() {
+                    if (this.order.Name && this.order.Phonenumber) {
+                        alert("Order Submited")
+                    }
+                    else {
+                        alert("Order Required")
+                    }
+                },
+       // set the url to your server and route
+                fetch("https://coursework2-frontend.herokuapp.com/collection/order", {
                     method: "POST", // set the HTTP method as 'POST'
                     headers: {
                         "Content-Type": "application/json", // set the data type as JSON
@@ -200,11 +181,11 @@
         created: function () {
             console.log("requesting data from server...");
 
-            fetch('https://coursework2-lession.herokuapp.com/').then(res => res.text())
+            fetch('https://coursework2-frontend.herokuapp.com/').then(res => res.text())
                 .then(txt => console.log('server message: ', txt)
                 )
 
-            fetch("https://coursework2-lession.herokuapp.com/collection/lesson").then(
+            fetch("https://coursework2-frontend.herokuapp.com/collection/lesson").then(
                 function (res) {
                     res.json().then(
                         function (json) {
